@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alumbrado Sestao 2025-2026 - Oficial</title>
+    <title>Alumbrado Sestao 2025-2026</title>
     <style>
         :root { --primary: #0f172a; --accent: #2563eb; --success: #16a34a; --warning: #ca8a04; --bg: #f8fafc; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
@@ -20,9 +20,8 @@
         .badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; font-weight: 600; text-transform: uppercase; }
         .badge.pendiente { background: #fef9c3; color: var(--warning); }
         .badge.hecho { background: #dcfce7; color: var(--success); }
-        .ref-container { margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #fff; }
-        .ref-container img { width: 100%; height: auto; display: block; max-height: 280px; object-fit: contain; background: #000; }
-        .ref-caption { font-size: 0.75rem; background: #e2e8f0; padding: 4px 8px; font-weight: 600; color: #475569; text-align: center; }
+        .ref-box { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-top: 8px; text-align: center; }
+        .ref-box p { font-size: 0.8rem; font-weight: 700; color: #1e293b; }
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
         .btn { padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .btn-map { background: #eff6ff; color: var(--accent); }
@@ -38,7 +37,7 @@
     <header>
         <div>
             <h1 style="font-size: 1.1rem;">Alumbrado Sestao</h1>
-            <p style="font-size:0.75rem; opacity:0.8;">Inventario, GPS y Planos Reales</p>
+            <p style="font-size:0.75rem; opacity:0.8;">Inventario Oficial y Campo</p>
         </div>
         <button onclick="addNewPoint()" class="btn-add">➕ Añadir Punto</button>
     </header>
@@ -54,52 +53,51 @@
             </select>
         </div>
 
-        <div id="app">Cargando inventario completo...</div>
+        <div id="app">Cargando aplicación...</div>
     </div>
 
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzxWbC04auRkHoufvK64_pIx5WLlTF_y40gRZD.icvcLsbbgGm007klp8_C9WomklFDI9w";
 
-        // Inventario completo de Sestao vinculado exactamente con las fotos de los esquemas facilitados
         let items = [
-            { ID: "SES-01", Sector: "Sector 1: Kasko/Centro", Ubicación: "Ayuntamiento", Tipo_Adorno: "TIPO E (Horno Jardín)", Cantidad: 1, Observaciones: "Balconada Ayuntamiento / Horno Jardín", Coordenada_GPS_InSitu: "43.294276,-3.018454", Estado: "Pendiente", FotoUrl: "image_23.png" },
-            { ID: "SES-02", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza del Kasko", Tipo_Adorno: "TIPO F (Jardín lateral)", Cantidad: 1, Observaciones: "Jardín lateral Ayuntamiento", Coordenada_GPS_InSitu: "43.294270,-3.018408", Estado: "Pendiente", FotoUrl: "image_23.png" },
-            { ID: "SES-03", Sector: "Sector 1: Kasko/Centro", Ubicación: "Kiosko Pza Kasko", Tipo_Adorno: "TIPO J", Cantidad: 1, Observaciones: "8 bolas mimbre + Icicle en perímetro", Coordenada_GPS_InSitu: "43.294200,-3.018300", Estado: "Pendiente", FotoUrl: "image_24.png" },
-            { ID: "SES-04", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO A (Ref: 711562)", Cantidad: 5, Observaciones: "Tramo plaza del Kasko y R. M. Azkue", Coordenada_GPS_InSitu: "43.294100,-3.018200", Estado: "Pendiente", FotoUrl: "image_11.png" },
-            { ID: "SES-05", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO B (Ref: 654395)", Cantidad: 8, Observaciones: "Frente al Ayuntamiento", Coordenada_GPS_InSitu: "43.294000,-3.018100", Estado: "Pendiente", FotoUrl: "image_9.png" },
-            { ID: "SES-06", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO C", Cantidad: 10, Observaciones: "Tramo del 39 al 49 ALTERNOS", Coordenada_GPS_InSitu: "43.293900,-3.018000", Estado: "Pendiente", FotoUrl: "image_9.png" },
-            { ID: "SES-07", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO C", Cantidad: 26, Observaciones: "Tramo del 68 al 90 ALTERNOS", Coordenada_GPS_InSitu: "43.293800,-3.017900", Estado: "Pendiente", FotoUrl: "image_9.png" },
-            { ID: "SES-08", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO D (Farola Kueto)", Cantidad: 3, Observaciones: "Frente colegio Kueto (Bulán Rojo)", Coordenada_GPS_InSitu: "43.293700,-3.017800", Estado: "Pendiente", FotoUrl: "image_21.png" },
-            { ID: "SES-09", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO C", Cantidad: 4, Observaciones: "Carrefour", Coordenada_GPS_InSitu: "43.293600,-3.017700", Estado: "Pendiente", FotoUrl: "image_9.png" },
-            { ID: "SES-10", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza de los tres Concejos", Tipo_Adorno: "TIPO G (Cono 3D)", Cantidad: 1, Observaciones: "Cono Navideño 3D en plaza", Coordenada_GPS_InSitu: "43.293500,-3.017600", Estado: "Pendiente", FotoUrl: "image_23.png" },
-            { ID: "SES-11", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza Tres Concejos", Tipo_Adorno: "TIPO I (Icicles farolas)", Cantidad: 3, Observaciones: "Adorno Especial Plaza (excepto cámara)", Coordenada_GPS_InSitu: "43.293400,-3.017500", Estado: "Pendiente", FotoUrl: "image_24.png" },
-            { ID: "SES-12", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza Conde Balmaseda", Tipo_Adorno: "TIPO G (Cono 3D)", Cantidad: 1, Observaciones: "Cono Navideño 3D en plaza", Coordenada_GPS_InSitu: "43.293300,-3.017400", Estado: "Pendiente", FotoUrl: "image_23.png" },
-            { ID: "SES-13", Sector: "Sector 1: Kasko/Centro", Ubicación: "Conde Balmaseda", Tipo_Adorno: "TIPO D (Farola Ref: 654555)", Cantidad: 5, Observaciones: "Tramo Conde Balmaseda", Coordenada_GPS_InSitu: "43.293200,-3.017300", Estado: "Pendiente", FotoUrl: "image_22.png" },
-            { ID: "SES-14", Sector: "Sector 1: Kasko/Centro", Ubicación: "Manuel Andrés", Tipo_Adorno: "TIPO A (Ref: 710749)", Cantidad: 5, Observaciones: "Tramo Gran Vía y Txabarri", Coordenada_GPS_InSitu: "43.293100,-3.017200", Estado: "Pendiente", FotoUrl: "image_9.png" },
-            { ID: "SES-15", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO A (Ref: 711562)", Cantidad: 4, Observaciones: "Tramo Zumalakarregi y La Galana", Coordenada_GPS_InSitu: "43.295000,-3.019000", Estado: "Pendiente", FotoUrl: "image_11.png" },
-            { ID: "SES-16", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO D (Farola Ref: 632003)", Cantidad: 7, Observaciones: "Arco Transversal / Rotonda Txabarri", Coordenada_GPS_InSitu: "43.295100,-3.019100", Estado: "Pendiente", FotoUrl: "image_16.png" },
-            { ID: "SES-17", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO D (Ref: 632003)", Cantidad: 1, Observaciones: "Cruce con Aizpuru", Coordenada_GPS_InSitu: "43.295200,-3.019200", Estado: "Pendiente", FotoUrl: "image_15.png" },
-            { ID: "SES-18", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO D (Ref: 632003)", Cantidad: 2, Observaciones: "Rotonda frente al nº 51", Coordenada_GPS_InSitu: "43.295300,-3.019300", Estado: "Pendiente", FotoUrl: "image_17.png" },
-            { ID: "SES-19", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Vía Galindo", Tipo_Adorno: "TIPO D (Farola Ref: 675819)", Cantidad: 10, Observaciones: "Arco Transversal Galindo", Coordenada_GPS_InSitu: "43.295400,-3.019400", Estado: "Pendiente", FotoUrl: "image_18.png" },
-            { ID: "SES-20", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Vía Galindo", Tipo_Adorno: "TIPO C", Cantidad: 4, Observaciones: "Banderola / Báculo, cruce Samaniego", Coordenada_GPS_InSitu: "43.295500,-3.019500", Estado: "Pendiente", FotoUrl: "image_18.png" },
-            { ID: "SES-21", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Vía Galindo", Tipo_Adorno: "TIPO D", Cantidad: 3, Observaciones: "Tramo Galindo", Coordenada_GPS_InSitu: "43.295600,-3.019600", Estado: "Pendiente", FotoUrl: "image_18.png" },
-            { ID: "SES-22", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Avenida del Kaiku", Tipo_Adorno: "TIPO D (Farola Kaiku)", Cantidad: 4, Observaciones: "Adornos en pasos de cebra", Coordenada_GPS_InSitu: "43.295700,-3.019700", Estado: "Pendiente", FotoUrl: "image_14.png" },
-            { ID: "SES-23", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Avenida del Kaiku", Tipo_Adorno: "TIPO E", Cantidad: 1, Observaciones: "Fachada Especial, viviendas punta", Coordenada_GPS_InSitu: "43.295800,-3.019800", Estado: "Pendiente", FotoUrl: "image_14.png" },
-            { ID: "SES-24", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Sotera de la Mier", Tipo_Adorno: "TIPO D (Farola Ref: 631969)", Cantidad: 9, Observaciones: "Banderola Parque Sotera (Bulán Rojo)", Coordenada_GPS_InSitu: "43.295900,-3.019900", Estado: "Pendiente", FotoUrl: "image_18.png" },
-            { ID: "SES-25", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Sotera de la Mier", Tipo_Adorno: "TIPO D", Cantidad: 3, Observaciones: "Adorno Farola", Coordenada_GPS_InSitu: "43.296000,-3.020000", Estado: "Pendiente", FotoUrl: "image_18.png" },
-            { ID: "SES-26", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Nicolás Ormaetxea", Tipo_Adorno: "TIPO D (Ref: 675819)", Cantidad: 3, Observaciones: "Rotonda Nicolás Ormaetxea", Coordenada_GPS_InSitu: "43.296100,-3.020100", Estado: "Pendiente", FotoUrl: "image_19.png" },
-            { ID: "SES-27", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Autonomía", Tipo_Adorno: "TIPO D (Ref: 675819)", Cantidad: 2, Observaciones: "Cruce con Concepción Arenal", Coordenada_GPS_InSitu: "43.296200,-3.020200", Estado: "Pendiente", FotoUrl: "image_20.png" },
-            { ID: "SES-28", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Los Baños", Tipo_Adorno: "TIPO A (Ref: 654395)", Cantidad: 5, Observaciones: "Tramo Gran Vía y J.C. Arriaga", Coordenada_GPS_InSitu: "43.296300,-3.020300", Estado: "Pendiente", FotoUrl: "image_9.png" },
-            { ID: "SES-29", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Rivas", Tipo_Adorno: "TIPO E", Cantidad: 1, Observaciones: "Fachada Especial frente al 6/8", Coordenada_GPS_InSitu: "43.296400,-3.020400", Estado: "Pendiente", FotoUrl: "image_9.png" },
-            { ID: "SES-30", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Plaza San Pedro", Tipo_Adorno: "TIPO H (Icicles Plaza)", Cantidad: 4, Observaciones: "Motivo en 4 entradas a la plaza", Coordenada_GPS_InSitu: "43.297000,-3.021000", Estado: "Pendiente", FotoUrl: "image_24.png" },
-            { ID: "SES-31", Sector: "Sector 3: Barrios/Plazas", Ubicación: "J.A. Gandarias", Tipo_Adorno: "TIPO D (Farola Gandarias)", Cantidad: 3, Observaciones: "Tramo Plaza San Pedro y Buenavista", Coordenada_GPS_InSitu: "43.297100,-3.021100", Estado: "Pendiente", FotoUrl: "image_21.png" },
-            { ID: "SES-32", Sector: "Sector 3: Barrios/Plazas", Ubicación: "J.A. Gandarias", Tipo_Adorno: "TIPO D", Cantidad: 2, Observaciones: "Tramo Gandarias", Coordenada_GPS_InSitu: "43.297200,-3.021200", Estado: "Pendiente", FotoUrl: "image_21.png" },
-            { ID: "SES-33", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Vía Amézaga", Tipo_Adorno: "TIPO A (Ref: 675604)", Cantidad: 3, Observaciones: "Tramo Vía Galindo y Plaza San Pedro", Coordenada_GPS_InSitu: "43.297300,-3.021300", Estado: "Pendiente", FotoUrl: "image_11.png" },
-            { ID: "SES-34", Sector: "Sector 3: Barrios/Plazas", Ubicación: "San Diego", Tipo_Adorno: "TIPO A (Ref: 678247)", Cantidad: 2, Observaciones: "Tramo Iberia y Aizpuru", Coordenada_GPS_InSitu: "43.297400,-3.021400", Estado: "Pendiente", FotoUrl: "image_11.png" },
-            { ID: "SES-35", Sector: "Sector 3: Barrios/Plazas", Ubicación: "San Diego", Tipo_Adorno: "TIPO C", Cantidad: 4, Observaciones: "Grupo La Paz", Coordenada_GPS_InSitu: "43.297500,-3.021500", Estado: "Pendiente", FotoUrl: "image_11.png" },
-            { ID: "SES-36", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Villar y Villate", Tipo_Adorno: "TIPO A (Ref: 710749)", Cantidad: 2, Observaciones: "Villar y Villate", Coordenada_GPS_InSitu: "43.297600,-3.021600", Estado: "Pendiente", FotoUrl: "image_11.png" },
-            { ID: "SES-37", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Iparraguirre", Tipo_Adorno: "TIPO A (Ref: 710749)", Cantidad: 2, Observaciones: "Iparraguirre", Coordenada_GPS_InSitu: "43.297700,-3.021700", Estado: "Pendiente", FotoUrl: "image_9.png" },
-            { ID: "SES-38", Sector: "Sector 3: Barrios/Plazas", Ubicación: "La Iberia", Tipo_Adorno: "TIPO A (Ref: 678247)", Cantidad: 4, Observaciones: "Tramo Gran Vía y Txabarri", Coordenada_GPS_InSitu: "43.297800,-3.021800", Estado: "Pendiente", FotoUrl: "image_9.png" }
+            { ID: "SES-01", Sector: "Sector 1: Kasko/Centro", Ubicación: "Ayuntamiento", Tipo_Adorno: "TIPO E (Horno Jardín)", Cantidad: 1, Observaciones: "Balconada Ayuntamiento / Horno Jardín", Coordenada_GPS_InSitu: "43.294276,-3.018454", Estado: "Pendiente" },
+            { ID: "SES-02", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza del Kasko", Tipo_Adorno: "TIPO F (Jardín lateral)", Cantidad: 1, Observaciones: "Jardín lateral Ayuntamiento", Coordenada_GPS_InSitu: "43.294270,-3.018408", Estado: "Pendiente" },
+            { ID: "SES-03", Sector: "Sector 1: Kasko/Centro", Ubicación: "Kiosko Pza Kasko", Tipo_Adorno: "TIPO J", Cantidad: 1, Observaciones: "8 bolas mimbre + Icicle en perímetro", Coordenada_GPS_InSitu: "43.294200,-3.018300", Estado: "Pendiente" },
+            { ID: "SES-04", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO A (Ref: 711562)", Cantidad: 5, Observaciones: "Tramo plaza del Kasko y R. M. Azkue", Coordenada_GPS_InSitu: "43.294100,-3.018200", Estado: "Pendiente" },
+            { ID: "SES-05", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO B (Ref: 654395)", Cantidad: 8, Observaciones: "Frente al Ayuntamiento", Coordenada_GPS_InSitu: "43.294000,-3.018100", Estado: "Pendiente" },
+            { ID: "SES-06", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO C", Cantidad: 10, Observaciones: "Tramo del 39 al 49 ALTERNOS", Coordenada_GPS_InSitu: "43.293900,-3.018000", Estado: "Pendiente" },
+            { ID: "SES-07", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO C", Cantidad: 26, Observaciones: "Tramo del 68 al 90 ALTERNOS", Coordenada_GPS_InSitu: "43.293800,-3.017900", Estado: "Pendiente" },
+            { ID: "SES-08", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO D (Farola Kueto)", Cantidad: 3, Observaciones: "Frente colegio Kueto (Bulán Rojo)", Coordenada_GPS_InSitu: "43.293700,-3.017800", Estado: "Pendiente" },
+            { ID: "SES-09", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO C", Cantidad: 4, Observaciones: "Carrefour", Coordenada_GPS_InSitu: "43.293600,-3.017700", Estado: "Pendiente" },
+            { ID: "SES-10", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza de los tres Concejos", Tipo_Adorno: "TIPO G (Cono 3D)", Cantidad: 1, Observaciones: "Cono Navideño 3D en plaza", Coordenada_GPS_InSitu: "43.293500,-3.017600", Estado: "Pendiente" },
+            { ID: "SES-11", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza Tres Concejos", Tipo_Adorno: "TIPO I (Icicles farolas)", Cantidad: 3, Observaciones: "Adorno Especial Plaza", Coordenada_GPS_InSitu: "43.293400,-3.017500", Estado: "Pendiente" },
+            { ID: "SES-12", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza Conde Balmaseda", Tipo_Adorno: "TIPO G (Cono 3D)", Cantidad: 1, Observaciones: "Cono Navideño 3D en plaza", Coordenada_GPS_InSitu: "43.293300,-3.017400", Estado: "Pendiente" },
+            { ID: "SES-13", Sector: "Sector 1: Kasko/Centro", Ubicación: "Conde Balmaseda", Tipo_Adorno: "TIPO D (Farola Ref: 654555)", Cantidad: 5, Observaciones: "Tramo Conde Balmaseda", Coordenada_GPS_InSitu: "43.293200,-3.017300", Estado: "Pendiente" },
+            { ID: "SES-14", Sector: "Sector 1: Kasko/Centro", Ubicación: "Manuel Andrés", Tipo_Adorno: "TIPO A (Ref: 710749)", Cantidad: 5, Observaciones: "Tramo Gran Vía y Txabarri", Coordenada_GPS_InSitu: "43.293100,-3.017200", Estado: "Pendiente" },
+            { ID: "SES-15", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO A (Ref: 711562)", Cantidad: 4, Observaciones: "Tramo Zumalakarregi y La Galana", Coordenada_GPS_InSitu: "43.295000,-3.019000", Estado: "Pendiente" },
+            { ID: "SES-16", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO D (Ref: 632003)", Cantidad: 7, Observaciones: "Arco Transversal / Rotonda Txabarri", Coordenada_GPS_InSitu: "43.295100,-3.019100", Estado: "Pendiente" },
+            { ID: "SES-17", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO D (Ref: 632003)", Cantidad: 1, Observaciones: "Cruce con Aizpuru", Coordenada_GPS_InSitu: "43.295200,-3.019200", Estado: "Pendiente" },
+            { ID: "SES-18", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO D (Ref: 632003)", Cantidad: 2, Observaciones: "Rotonda frente al nº 51", Coordenada_GPS_InSitu: "43.295300,-3.019300", Estado: "Pendiente" },
+            { ID: "SES-19", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Vía Galindo", Tipo_Adorno: "TIPO D (Ref: 675819)", Cantidad: 10, Observaciones: "Arco Transversal Galindo", Coordenada_GPS_InSitu: "43.295400,-3.019400", Estado: "Pendiente" },
+            { ID: "SES-20", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Vía Galindo", Tipo_Adorno: "TIPO C", Cantidad: 4, Observaciones: "Banderola / Báculo, cruce Samaniego", Coordenada_GPS_InSitu: "43.295500,-3.019500", Estado: "Pendiente" },
+            { ID: "SES-21", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Vía Galindo", Tipo_Adorno: "TIPO D", Cantidad: 3, Observaciones: "Tramo Galindo", Coordenada_GPS_InSitu: "43.295600,-3.019600", Estado: "Pendiente" },
+            { ID: "SES-22", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Avenida del Kaiku", Tipo_Adorno: "TIPO D (Farola Kaiku)", Cantidad: 4, Observaciones: "Adornos en pasos de cebra", Coordenada_GPS_InSitu: "43.295700,-3.019700", Estado: "Pendiente" },
+            { ID: "SES-23", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Avenida del Kaiku", Tipo_Adorno: "TIPO E", Cantidad: 1, Observaciones: "Fachada Especial, viviendas punta", Coordenada_GPS_InSitu: "43.295800,-3.019800", Estado: "Pendiente" },
+            { ID: "SES-24", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Sotera de la Mier", Tipo_Adorno: "TIPO D (Ref: 631969)", Cantidad: 9, Observaciones: "Banderola Parque Sotera (Bulán Rojo)", Coordenada_GPS_InSitu: "43.295900,-3.019900", Estado: "Pendiente" },
+            { ID: "SES-25", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Sotera de la Mier", Tipo_Adorno: "TIPO D", Cantidad: 3, Observaciones: "Adorno Farola", Coordenada_GPS_InSitu: "43.296000,-3.020000", Estado: "Pendiente" },
+            { ID: "SES-26", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Nicolás Ormaetxea", Tipo_Adorno: "TIPO D (Ref: 675819)", Cantidad: 3, Observaciones: "Rotonda Nicolás Ormaetxea", Coordenada_GPS_InSitu: "43.296100,-3.020100", Estado: "Pendiente" },
+            { ID: "SES-27", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Autonomía", Tipo_Adorno: "TIPO D (Ref: 675819)", Cantidad: 2, Observaciones: "Cruce con Concepción Arenal", Coordenada_GPS_InSitu: "43.296200,-3.020200", Estado: "Pendiente" },
+            { ID: "SES-28", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Los Baños", Tipo_Adorno: "TIPO A (Ref: 654395)", Cantidad: 5, Observaciones: "Tramo Gran Vía y J.C. Arriaga", Coordenada_GPS_InSitu: "43.296300,-3.020300", Estado: "Pendiente" },
+            { ID: "SES-29", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Rivas", Tipo_Adorno: "TIPO E", Cantidad: 1, Observaciones: "Fachada Especial frente al 6/8", Coordenada_GPS_InSitu: "43.296400,-3.020400", Estado: "Pendiente" },
+            { ID: "SES-30", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Plaza San Pedro", Tipo_Adorno: "TIPO H (Icicles Plaza)", Cantidad: 4, Observaciones: "Motivo en 4 entradas a la plaza", Coordenada_GPS_InSitu: "43.297000,-3.021000", Estado: "Pendiente" },
+            { ID: "SES-31", Sector: "Sector 3: Barrios/Plazas", Ubicación: "J.A. Gandarias", Tipo_Adorno: "TIPO D (Farola Gandarias)", Cantidad: 3, Observaciones: "Tramo Plaza San Pedro y Buenavista", Coordenada_GPS_InSitu: "43.297100,-3.021100", Estado: "Pendiente" },
+            { ID: "SES-32", Sector: "Sector 3: Barrios/Plazas", Ubicación: "J.A. Gandarias", Tipo_Adorno: "TIPO D", Cantidad: 2, Observaciones: "Tramo Gandarias", Coordenada_GPS_InSitu: "43.297200,-3.021200", Estado: "Pendiente" },
+            { ID: "SES-33", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Vía Amézaga", Tipo_Adorno: "TIPO A (Ref: 675604)", Cantidad: 3, Observaciones: "Tramo Vía Galindo y Plaza San Pedro", Coordenada_GPS_InSitu: "43.297300,-3.021300", Estado: "Pendiente" },
+            { ID: "SES-34", Sector: "Sector 3: Barrios/Plazas", Ubicación: "San Diego", Tipo_Adorno: "TIPO A (Ref: 678247)", Cantidad: 2, Observaciones: "Tramo Iberia y Aizpuru", Coordenada_GPS_InSitu: "43.297400,-3.021400", Estado: "Pendiente" },
+            { ID: "SES-35", Sector: "Sector 3: Barrios/Plazas", Ubicación: "San Diego", Tipo_Adorno: "TIPO C", Cantidad: 4, Observaciones: "Grupo La Paz", Coordenada_GPS_InSitu: "43.297500,-3.021500", Estado: "Pendiente" },
+            { ID: "SES-36", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Villar y Villate", Tipo_Adorno: "TIPO A (Ref: 710749)", Cantidad: 2, Observaciones: "Villar y Villate", Coordenada_GPS_InSitu: "43.297600,-3.021600", Estado: "Pendiente" },
+            { ID: "SES-37", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Iparraguirre", Tipo_Adorno: "TIPO A (Ref: 710749)", Cantidad: 2, Observaciones: "Iparraguirre", Coordenada_GPS_InSitu: "43.297700,-3.021700", Estado: "Pendiente" },
+            { ID: "SES-38", Sector: "Sector 3: Barrios/Plazas", Ubicación: "La Iberia", Tipo_Adorno: "TIPO A (Ref: 678247)", Cantidad: 4, Observaciones: "Tramo Gran Vía y Txabarri", Coordenada_GPS_InSitu: "43.297800,-3.021800", Estado: "Pendiente" }
         ];
 
         function render(data) {
@@ -115,28 +113,6 @@
                     ? `https://www.google.com/maps/search/?api=1&query=${item.Coordenada_GPS_InSitu}`
                     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.Ubicación + ' Sestao')}`;
 
-                // Mapeo seguro de las imágenes reales enviadas
-                let imgSrc = "";
-                if(item.FotoUrl === "image_9.png") imgSrc = "https://i.ibb.co/6803Y3K/image-9.png";
-                else if(item.FotoUrl === "image_11.png") imgSrc = "https://i.ibb.co/sK1845v/image-11.png";
-                else if(item.FotoUrl === "image_14.png") imgSrc = "https://i.ibb.co/5G3Q142/image-14.png";
-                else if(item.FotoUrl === "image_15.png") imgSrc = "https://i.ibb.co/8m1542f/image-15.png";
-                else if(item.FotoUrl === "image_16.png") imgSrc = "https://i.ibb.co/0V82141/image-16.png";
-                else if(item.FotoUrl === "image_17.png") imgSrc = "https://i.ibb.co/2K21541/image-17.png";
-                else if(item.FotoUrl === "image_18.png") imgSrc = "https://i.ibb.co/9R21415/image-18.png";
-                else if(item.FotoUrl === "image_19.png") imgSrc = "https://i.ibb.co/1K24512/image-19.png";
-                else if(item.FotoUrl === "image_20.png") imgSrc = "https://i.ibb.co/4K51241/image-20.png";
-                else if(item.FotoUrl === "image_21.png") imgSrc = "https://i.ibb.co/7K81254/image-21.png";
-                else if(item.FotoUrl === "image_22.png") imgSrc = "https://i.ibb.co/3K24151/image-22.png";
-                else if(item.FotoUrl === "image_23.png") imgSrc = "https://i.ibb.co/9K14251/image-23.png";
-                else if(item.FotoUrl === "image_24.png") imgSrc = "https://i.ibb.co/6K15241/image-24.png";
-
-                let imgHtml = imgSrc ? `
-                    <div class="ref-container">
-                        <img src="${imgSrc}" alt="Esquema de instalación" loading="lazy">
-                        <div class="ref-caption">📐 Esquema y ubicación oficial: ${item.Tipo_Adorno}</div>
-                    </div>` : '';
-
                 return `
                     <div class="${cardClass}">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -148,7 +124,9 @@
                         </div>
                         <p style="font-size:0.85rem; color:#64748b; margin:6px 0;"><strong>Sector:</strong> ${item.Sector} | <strong>Adorno:</strong> ${item.Tipo_Adorno} (${item.Cantidad} ud)</p>
                         <p style="font-size:0.85rem; color:#64748b; margin-bottom:6px;"><strong>Obs:</strong> ${item.Observaciones || 'Sin observaciones'}</p>
-                        ${imgHtml}
+                        <div class="ref-box">
+                            <p>📌 Elemento asignado: ${item.Tipo_Adorno}</p>
+                        </div>
                         <div id="gps-info-${item.ID}" class="gps-status">📍 GPS: ${item.Coordenada_GPS_InSitu || 'No registrado'}</div>
                         <div class="actions">
                             <a href="${mapUrl}" target="_blank" class="btn btn-map">🗺️ Ir al sitio</a>
@@ -195,8 +173,7 @@
                     Observaciones: "Punto añadido in situ desde la calle",
                     Coordenada_GPS_InSitu: coords,
                     Estado: "Mapeado",
-                    Completado: true,
-                    FotoUrl: ""
+                    Completado: true
                 };
                 items.unshift(nuevoPunto);
                 render(items);

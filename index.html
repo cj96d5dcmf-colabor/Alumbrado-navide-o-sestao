@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alumbrado Sestao - En Línea</title>
+    <title>Alumbrado Sestao - Tiempo Real</title>
     <style>
         :root { 
             --bg: #0f172a; 
@@ -80,7 +80,7 @@
     <header>
         <div>
             <h1 style="font-size: 1.15rem; color: #fef08a;">🎄 Alumbrado Sestao</h1>
-            <p style="font-size:0.75rem; color: #cbd5e1; font-weight: 600;">Conexión Directa Línea</p>
+            <p style="font-size:0.75rem; color: #cbd5e1; font-weight: 600;">Tiempo Real + Drive Automático</p>
         </div>
         <button onclick="loadData()" class="btn-add">🔄 Actualizar</button>
     </header>
@@ -96,36 +96,27 @@
             </select>
         </div>
 
-        <div id="loading">Conectando con la nube de Sestao...</div>
+        <div id="loading">Conectando con la nube...</div>
         <div id="app"></div>
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzchcHH-JHkYmZajk7hsCWEOLA_LICp2YfCXGHUcpmZDMS2G-liYzxs_VRewlEnRR7HAQ/exec";
+        // URL de tu Google Apps Script (Versión 5 definitiva)
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbrUUGBI-frRduv_FZ91MH9UOAKAGUY63kizFWY3s5Vc_W3nul5KJSELxLuzMC-C8gdMw/exec";
 
         let items = [];
 
-        // Usamos JSONP mediante script dinámico para evitar por completo el bloqueo CORS de iOS
-        function loadData() {
+        async function loadData() {
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('loading').innerText = "Conectando con la nube de Sestao...";
-            
-            const oldScript = document.getElementById('jsonp-script');
-            if (oldScript) oldScript.remove();
-
-            const script = document.createElement('script');
-            script.id = 'jsonp-script';
-            script.src = `${WEB_APP_URL}?callback=handleResponse`;
-            script.onerror = function() {
-                document.getElementById('loading').innerText = "Error de conexión con Google. Pulsa Actualizar.";
-            };
-            document.body.appendChild(script);
-        }
-
-        function handleResponse(data) {
-            items = data;
-            document.getElementById('loading').style.display = 'none';
-            render(items);
+            document.getElementById('loading').innerText = "Conectando con la nube...";
+            try {
+                let response = await fetch(WEB_APP_URL);
+                items = await response.json();
+                document.getElementById('loading').style.display = 'none';
+                render(items);
+            } catch (err) {
+                document.getElementById('loading').innerText = "Error de conexión. Pulsa Actualizar.";
+            }
         }
 
         async function updateServer(payload) {
@@ -144,7 +135,7 @@
         function render(data) {
             const container = document.getElementById('app');
             if(!data || data.length === 0) {
-                container.innerHTML = "<p style='text-align:center; color:#cbd5e1;'>No hay datos disponibles.</p>";
+                container.innerHTML = "<p style='text-align:center; color:#cbd5e1;'>No hay datos.</p>";
                 return;
             }
             container.innerHTML = data.map(item => {
@@ -226,7 +217,7 @@
                 alert("Subiendo foto a Google Drive de forma automática...");
                 await updateServer({ id: id, estado: 'Instalado', fotoBase64: base64Code });
                 alert("¡Foto subida a Drive y sincronizada!");
-                setTimeout(loadData, 2000);
+                setTimeout(loadData, 2500);
             };
             reader.readAsDataURL(file);
         }

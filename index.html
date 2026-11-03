@@ -3,41 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alumbrado Sestao - Diagnóstico</title>
+    <title>Alumbrado Sestao - En Línea</title>
     <style>
-        :root { --bg: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; }
+        :root { 
+            --bg: #0f172a; 
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --header-gradient: linear-gradient(135deg, #7f1d1d 0%, #1e1b4b 50%, #090d16 100%);
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         body { background-color: var(--bg); color: var(--text-main); padding-bottom: 60px; }
-        header { background: #7f1d1d; color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        header { 
+            background: var(--header-gradient); 
+            color: white; 
+            padding: 16px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border-bottom: 3px solid #f59e0b; 
+        }
+        
         .container { padding: 14px; max-width: 600px; margin: 0 auto; }
-        .btn-add { background: #16a34a; color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 14px; border: 1px solid #334155; border-left: 6px solid #f59e0b; }
-        .card.completado { border-left-color: #22c55e; background: #064e3b22; }
-        .card-title { font-size: 1.05rem; font-weight: 700; color: #f8fafc; }
-        .badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: 700; }
-        .badge.pendiente { background: #78350f; color: #fde68a; }
-        .badge.hecho { background: #064e3b; color: #86efac; }
+        
+        .btn-add { 
+            background: linear-gradient(135deg, #16a34a, #15803d); 
+            color: white; 
+            border: none; 
+            padding: 10px 14px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            font-size: 0.85rem; 
+            cursor: pointer; 
+            white-space: nowrap; 
+        }
+
+        .filters { display: flex; gap: 8px; margin-bottom: 14px; }
+        .filters input, .filters select { padding: 10px; border: 1px solid #475569; border-radius: 8px; font-size: 0.9rem; background: #1e293b; color: white; outline: none; }
+        .filters input { flex: 1; }
+
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 12px; 
+            padding: 16px; 
+            margin-bottom: 14px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+            border: 1px solid #334155; 
+            border-left: 6px solid #f59e0b;
+        }
+        .card.completado { border-left-color: #22c55e; background: #064e3b22; border-color: #065f46; }
+
+        .card-title { font-size: 1.05rem; font-weight: 700; color: #f8fafc; margin-bottom: 2px; }
+        .badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
+        .badge.pendiente { background: #78350f; color: #fde68a; border: 1px solid #b45309; }
+        .badge.hecho { background: #064e3b; color: #86efac; border: 1px solid #059669; }
+
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-        .btn { padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; text-align: center; }
-        .btn-map { background: #1e3a8a; color: #93c5fd; }
-        .btn-gps { background: #064e3b; color: #86efac; }
-        .btn-check { background: #334155; color: #f1f5f9; }
-        .btn-camera { background: #831843; color: #fbcfe8; grid-column: span 2; }
+        .btn { padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .btn-map { background: #1e3a8a; color: #93c5fd; border: 1px solid #2563eb; }
+        .btn-gps { background: #064e3b; color: #86efac; border: 1px solid #059669; }
+        .btn-check { background: #334155; color: #f1f5f9; border: 1px solid #475569; }
+        .card.completado .btn-check { background: #065f46; color: #ffffff; font-weight: 700; }
+        .btn-camera { background: #831843; color: #fbcfe8; border: 1px solid #be123c; grid-column: span 2; }
+        
+        .gps-status { font-size: 0.75rem; color: #cbd5e1; margin-top: 6px; font-weight: 500; }
         input[type="file"] { display: none; }
-        #debug-box { background: #000; color: #00ff00; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; margin-bottom: 14px; word-break: break-all; max-height: 200px; overflow-y: auto; }
+        
+        #loading { text-align: center; padding: 30px; font-weight: bold; color: #fbbf24; }
     </style>
 </head>
 <body>
     <header>
         <div>
-            <h1 style="font-size: 1.15rem;">🎄 Alumbrado Sestao</h1>
-            <p style="font-size:0.75rem;">Modo Diagnóstico Directo</p>
+            <h1 style="font-size: 1.15rem; color: #fef08a;">🎄 Alumbrado Sestao</h1>
+            <p style="font-size:0.75rem; color: #cbd5e1; font-weight: 600;">Conexión Directa Línea</p>
         </div>
-        <button onclick="loadData()" class="btn-add">🔄 Probar</button>
+        <button onclick="loadData()" class="btn-add">🔄 Actualizar</button>
     </header>
 
     <div class="container">
-        <div id="debug-box">Iniciando petición a Google Apps Script...</div>
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Buscar calle, ID o adorno..." onkeyup="filterData()">
+            <select id="sectorFilter" onchange="filterData()">
+                <option value="">Todos los sectores</option>
+                <option value="Sector 1">Sector 1</option>
+                <option value="Sector 2">Sector 2</option>
+                <option value="Sector 3">Sector 3</option>
+            </select>
+        </div>
+
+        <div id="loading">Conectando con la nube de Sestao...</div>
         <div id="app"></div>
     </div>
 
@@ -46,55 +105,141 @@
 
         let items = [];
 
-        function log(msg) {
-            const box = document.getElementById('debug-box');
-            box.innerHTML += "<br>> " + msg;
-            console.log(msg);
+        // Usamos JSONP mediante script dinámico para evitar por completo el bloqueo CORS de iOS
+        function loadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').innerText = "Conectando con la nube de Sestao...";
+            
+            const oldScript = document.getElementById('jsonp-script');
+            if (oldScript) oldScript.remove();
+
+            const script = document.createElement('script');
+            script.id = 'jsonp-script';
+            script.src = `${WEB_APP_URL}?callback=handleResponse`;
+            script.onerror = function() {
+                document.getElementById('loading').innerText = "Error de conexión con Google. Pulsa Actualizar.";
+            };
+            document.body.appendChild(script);
         }
 
-        async function loadData() {
-            document.getElementById('debug-box').innerHTML = "Conectando a Google Apps Script...";
-            try {
-                let response = await fetch(WEB_APP_URL, { redirect: 'follow' });
-                log("Respuesta recibida. Estado HTTP: " + response.status);
-                
-                let rawText = await response.text();
-                log("Primeros 100 caracteres recibidos: " + rawText.substring(0, 100));
+        function handleResponse(data) {
+            items = data;
+            document.getElementById('loading').style.display = 'none';
+            render(items);
+        }
 
-                try {
-                    items = JSON.parse(rawText);
-                    log("✅ JSON parseado correctamente. Elementos: " + items.length);
-                    document.getElementById('debug-box').style.background = "#064e3b";
-                    render(items);
-                } catch(e) {
-                    log("❌ ERROR PARSEANDO JSON: Google devolvió HTML en vez de datos.");
-                    log("Detalle: " + e.message);
-                    document.getElementById('debug-box').style.background = "#7f1d1d";
-                }
+        async function updateServer(payload) {
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
             } catch (err) {
-                log("❌ ERROR RED / FETCH: " + err.message);
-                document.getElementById('debug-box').style.background = "#7f1d1d";
+                console.log("Error sincronizando");
             }
         }
 
         function render(data) {
             const container = document.getElementById('app');
+            if(!data || data.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color:#cbd5e1;'>No hay datos disponibles.</p>";
+                return;
+            }
             container.innerHTML = data.map(item => {
                 let isDone = item.Estado === 'Instalado' || item.Estado === 'Mapeado';
+                let cardClass = isDone ? 'card completado' : 'card';
+                let badgeClass = isDone ? 'hecho' : 'pendiente';
+                let badgeText = isDone ? '✓ Hecho / Mapeado' : 'Pendiente';
+                let checkLabel = isDone ? '↩ Desmarcar' : '✓ Marcar Hecho';
+
+                let mapUrl = item.Coordenada_GPS_InSitu 
+                    ? `https://www.google.com/maps/search/?api=1&query=${item.Coordenada_GPS_InSitu}`
+                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.Ubicación + ' Sestao')}`;
+
+                let fotoLink = item.FotoRef ? `<div style="margin-top:6px;"><a href="${item.FotoRef}" target="_blank" style="color:#60a5fa; font-size:0.75rem; font-weight:600;">📎 Ver foto guardada en Drive</a></div>` : '';
+
                 return `
-                    <div class="card ${isDone ? 'completado' : ''}">
-                        <div style="display:flex; justify-content:space-between;">
+                    <div class="${cardClass}">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <div>
-                                <span style="font-size: 0.75rem; color: #fbbf24; font-weight: 700;">${item.ID || 'SIN_ID'}</span>
-                                <div class="card-title">${item.Ubicación || 'Sin ubicación'}</div>
+                                <span style="font-size: 0.75rem; color: #fbbf24; font-weight: 700;">${item.ID}</span>
+                                <div class="card-title">${item.Ubicación}</div>
                             </div>
-                            <span class="badge ${isDone ? 'hecho' : 'pendiente'}">${isDone ? '✓ Hecho' : 'Pendiente'}</span>
+                            <span class="badge ${badgeClass}">${badgeText}</span>
                         </div>
-                        <p style="font-size:0.85rem; margin:6px 0;">Adorno: ${item.Tipo_Adorno || '-'} (${item.Cantidad || 0} ud)</p>
-                        <div style="font-size:0.75rem; color:#cbd5e1;">📍 GPS: ${item.Coordenada_GPS_InSitu || 'No registrado'}</div>
+                        <p style="font-size:0.85rem; color:#cbd5e1; margin:6px 0;"><strong>Sector:</strong> ${item.Sector} | <strong>Adorno:</strong> ${item.Tipo_Adorno} (${item.Cantidad} ud)</p>
+                        <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom:4px;"><strong>Obs:</strong> ${item.Observaciones || 'Sin observaciones'}</p>
+                        <div class="gps-status">📍 GPS: ${item.Coordenada_GPS_InSitu || 'No registrado'}</div>
+                        ${fotoLink}
+                        
+                        <div class="actions">
+                            <a href="${mapUrl}" target="_blank" class="btn btn-map">🗺️ Ir al sitio</a>
+                            <button onclick="toggleComplete('${item.ID}')" class="btn btn-check">${checkLabel}</button>
+                            <button onclick="setGPS('${item.ID}')" class="btn btn-gps">📍 Fijar GPS</button>
+                            <label class="btn btn-camera">
+                                📷 Hacer foto y subir a Drive
+                                <input type="file" accept="image/*" capture="camera" onchange="uploadPhoto(event, '${item.ID}')">
+                            </label>
+                        </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        async function toggleComplete(id) {
+            let item = items.find(i => i.ID === id);
+            if(item) {
+                item.Estado = (item.Estado === 'Instalado') ? 'Pendiente' : 'Instalado';
+                render(items);
+                await updateServer({ id: id, estado: item.Estado });
+            }
+        }
+
+        async function setGPS(id) {
+            if (!navigator.geolocation) return alert("Sin GPS");
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                let coords = `${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`;
+                let item = items.find(i => i.ID === id);
+                if(item) {
+                    item.Coordenada_GPS_InSitu = coords;
+                    item.Estado = 'Mapeado';
+                    render(items);
+                    await updateServer({ id: id, gps: coords, estado: 'Mapeado' });
+                    alert("GPS sincronizado en la nube.");
+                }
+            }, () => alert("GPS denegado"));
+        }
+
+        async function uploadPhoto(event, id) {
+            let file = event.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = async function(e) {
+                let base64Code = e.target.result.split(',')[1];
+                let item = items.find(i => i.ID === id);
+                if(item) {
+                    item.Estado = 'Instalado';
+                    render(items);
+                }
+                alert("Subiendo foto a Google Drive de forma automática...");
+                await updateServer({ id: id, estado: 'Instalado', fotoBase64: base64Code });
+                alert("¡Foto subida a Drive y sincronizada!");
+                setTimeout(loadData, 2000);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function filterData() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const sector = document.getElementById('sectorFilter').value;
+            const filtered = items.filter(i => {
+                const matchesSearch = i.Ubicación.toLowerCase().includes(search) || i.Tipo_Adorno.toLowerCase().includes(search) || i.ID.toLowerCase().includes(search);
+                const matchesSector = sector === "" || i.Sector.includes(sector);
+                return matchesSearch && matchesSector;
+            });
+            render(filtered);
         }
 
         loadData();

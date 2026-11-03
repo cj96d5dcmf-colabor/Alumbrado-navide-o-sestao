@@ -63,14 +63,16 @@
         .btn-file { background: #581c87; color: #e9d5ff; }
 
         .history-box { background: #0f172a; border-radius: 8px; padding: 8px; margin-top: 8px; border: 1px solid #334155; }
-        .history-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #cbd5e1; padding: 4px 0; border-bottom: 1px solid #1e293b; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #cbd5e1; padding: 6px 0; border-bottom: 1px solid #1e293b; }
         .history-item:last-child { border-bottom: none; }
         
         .gallery-container { display: flex; gap: 8px; overflow-x: auto; margin-top: 6px; padding-bottom: 4px; }
         .gallery-card { flex: 0 0 90px; text-align: center; background: #1e293b; border-radius: 6px; padding: 4px; border: 1px solid #475569; }
         .gallery-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer; }
         
-        .btn-del-item { background: #7f1d1d; color: #fca5a5; border: none; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; cursor: pointer; margin-top: 2px; }
+        .btn-del-item { background: #7f1d1d; color: #fca5a5; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; cursor: pointer; }
+        .gps-link { color: #93c5fd; text-decoration: none; font-weight: 600; }
+        .gps-link:hover { text-decoration: underline; }
 
         input[type="file"] { display: none; }
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
@@ -113,7 +115,6 @@
     </div>
 
     <script>
-        // URL de Apps Script recién actualizada
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxklX433TBkCRx5IJ9NatXM_sVLPPNoNZZmCI9be0wsqwZyexuQVksmxBHScEgSlFTSQQ/exec";
 
         let sestaoItems = [
@@ -154,8 +155,8 @@
         ];
 
         let items = sestaoItems;
-        if(localStorage.getItem('nko_sestao_v7')) {
-            try { items = JSON.parse(localStorage.getItem('nko_sestao_v7')); } catch(e){}
+        if(localStorage.getItem('nko_sestao_v8')) {
+            try { items = JSON.parse(localStorage.getItem('nko_sestao_v8')); } catch(e){}
         }
 
         function changeTown() {
@@ -180,7 +181,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('nko_sestao_v7', JSON.stringify(items));
+            localStorage.setItem('nko_sestao_v8', JSON.stringify(items));
         }
 
         function getTimeStamp() {
@@ -206,8 +207,12 @@
                 if(item.GpsList && item.GpsList.length > 0) {
                     gpsHtml = `<div class="history-box">📍 <strong>GPS Registrados (${item.GpsList.length}):</strong>`;
                     item.GpsList.forEach((g, index) => {
+                        let singleMapUrl = `https://www.google.com/maps/search/?api=1&query=${g.coords}`;
                         gpsHtml += `<div class="history-item">
-                            <span>${g.time}: ${g.coords}</span>
+                            <div>
+                                <span style="font-size:0.65rem; color:#94a3b8; display:block;">${g.time}</span>
+                                <a href="${singleMapUrl}" target="_blank" class="gps-link">🗺️ Abrir en Maps (${g.coords})</a>
+                            </div>
                             <button onclick="removeGps('${item.ID}', ${index})" class="btn-del-item">🗑️ Borrar</button>
                         </div>`;
                     });

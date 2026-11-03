@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alumbrado Sestao - Modo Local Robusto</title>
+    <title>Alumbrado Sestao - Listado Completo</title>
     <style>
         :root { 
             --bg: #0f172a; 
@@ -68,17 +68,23 @@
         .btn-gps { background: #064e3b; color: #86efac; border: 1px solid #059669; }
         .btn-check { background: #334155; color: #f1f5f9; border: 1px solid #475569; }
         .card.completado .btn-check { background: #065f46; color: #ffffff; font-weight: 700; }
-        .btn-camera { background: #831843; color: #fbcfe8; border: 1px solid #be123c; grid-column: span 2; }
+        .btn-camera { background: #831843; color: #fbcfe8; }
+        .btn-file { background: #581c87; color: #e9d5ff; }
+        .btn-undo { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; grid-column: span 2; }
         
+        .thumb-preview { width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid #475569; cursor: pointer; }
         .gps-status { font-size: 0.75rem; color: #cbd5e1; margin-top: 6px; font-weight: 500; }
         input[type="file"] { display: none; }
+
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+        .modal img { max-width: 90%; max-height: 80%; border-radius: 8px; }
     </style>
 </head>
 <body>
     <header>
         <div>
             <h1 style="font-size: 1.15rem; color: #fef08a;">🎄 Alumbrado Sestao</h1>
-            <p style="font-size:0.75rem; color: #cbd5e1; font-weight: 600;">Modo Robusto Directo</p>
+            <p style="font-size:0.75rem; color: #cbd5e1; font-weight: 600;">Listado Completo (34 Puntos)</p>
         </div>
         <button onclick="location.reload()" class="btn-add">🔄 Recargar</button>
     </header>
@@ -97,21 +103,56 @@
         <div id="app"></div>
     </div>
 
+    <div id="imgModal" class="modal" onclick="this.style.display='none'">
+        <img id="modalImg" src="">
+    </div>
+
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbrUUGBI-frRduv_FZ91MH9UOAKAGUY63kizFWY3s5Vc_W3nul5KJSELxLuzMC-C8gdMw/exec";
 
-        // Base de datos integrada de Sestao para garantizar velocidad y cero bloqueos de red
-        let items = [
-            { ID: "S01", Sector: "Sector 1", Ubicación: "Gran Vía 1", Tipo_Adorno: "Arcos luminosos", Cantidad: 2, Observaciones: "Punto principal", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "" },
-            { ID: "S02", Sector: "Sector 1", Ubicación: "Plaza del Kasko", Tipo_Adorno: "Motivo central", Cantidad: 1, Observaciones: "Especial plaza", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "" },
-            { ID: "S03", Sector: "Sector 2", Ubicación: "Vicente Blasco Ibáñez", Tipo_Adorno: "Farolas", Cantidad: 4, Observaciones: "Revisar anclajes", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "" },
-            { ID: "S04", Sector: "Sector 2", Ubicación: "Avenida Los Baños", Tipo_Adorno: "Arcos luminosos", Cantidad: 3, Observaciones: "Salida hacia muelle", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "" },
-            { ID: "S05", Sector: "Sector 3", Ubicación: "Markonzaga", Tipo_Adorno: "Guirnaldas", Cantidad: 5, Observaciones: "Zona comercial", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "" }
+        // Listado completo con las 34 ubicaciones de Sestao
+        let itemsDefault = [
+            { ID: "S01", Sector: "Sector 1", Ubicación: "Gran Vía 1", Tipo_Adorno: "Arcos luminosos", Cantidad: 2, Observaciones: "Punto principal", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S02", Sector: "Sector 1", Ubicación: "Plaza del Kasko", Tipo_Adorno: "Motivo central", Cantidad: 1, Observaciones: "Especial plaza", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S03", Sector: "Sector 1", Ubicación: "Calle Chavarri 12", Tipo_Adorno: "Farolas", Cantidad: 6, Observaciones: "Tramo bajo", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S04", Sector: "Sector 1", Ubicación: "Calle Chavarri 45", Tipo_Adorno: "Farolas", Cantidad: 4, Observaciones: "Tramo medio", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S05", Sector: "Sector 1", Ubicación: "Calle Chavarri 80", Tipo_Adorno: "Farolas", Cantidad: 5, Observaciones: "Tramo alto", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S06", Sector: "Sector 1", Ubicación: "Vicente Blasco Ibáñez", Tipo_Adorno: "Farolas", Cantidad: 4, Observaciones: "Revisar anclajes", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S07", Sector: "Sector 1", Ubicación: "Avenida Los Baños", Tipo_Adorno: "Arcos luminosos", Cantidad: 3, Observaciones: "Salida hacia muelle", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S08", Sector: "Sector 1", Ubicación: "Karmelo Torre", Tipo_Adorno: "Motivo fachada", Cantidad: 2, Observaciones: "Zona cultural", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S09", Sector: "Sector 1", Ubicación: "Isaac Peral", Tipo_Adorno: "Guirnaldas", Cantidad: 4, Observaciones: "Cruce comercial", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S10", Sector: "Sector 1", Ubicación: "Gaspar de Montes arco", Tipo_Adorno: "Arcos", Cantidad: 2, Observaciones: "Acceso principal", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            
+            { ID: "S11", Sector: "Sector 2", Ubicación: "Alameda Las Llanas", Tipo_Adorno: "Guirnalda arbolado", Cantidad: 8, Observaciones: "Zona paseo", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S12", Sector: "Sector 2", Ubicación: "San Ignacio de Loyola", Tipo_Adorno: "Farolas", Cantidad: 5, Observaciones: "Alineación completa", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S13", Sector: "Sector 2", Ubicación: "Gran Vía Tramo Alto", Tipo_Adorno: "Arcos luminosos", Cantidad: 4, Observaciones: "Continuación", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S14", Sector: "Sector 2", Ubicación: "Eduardo Coste", Tipo_Adorno: "Farolas", Cantidad: 3, Observaciones: "Zona residencial", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S15", Sector: "Sector 2", Ubicación: "Reina Victoria", Tipo_Adorno: "Guirnaldas", Cantidad: 4, Observaciones: "Eje central", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S16", Sector: "Sector 2", Ubicación: "Juan XXIII", Tipo_Adorno: "Motivo cruzado", Cantidad: 2, Observaciones: "Plaza interior", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S17", Sector: "Sector 2", Ubicación: "General Castaños", Tipo_Adorno: "Arcos", Cantidad: 3, Observaciones: "Acceso norte", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S18", Sector: "Sector 2", Ubicación: "Galindo pase", Tipo_Adorno: "Farolas", Cantidad: 5, Observaciones: "Margen ribera", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S19", Sector: "Sector 2", Ubicación: "Txabarri Bajo Puente", Tipo_Adorno: "Refuerzo", Cantidad: 2, Observaciones: "Zona oscura", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S20", Sector: "Sector 2", Ubicación: "Los Baños 2", Tipo_Adorno: "Guirnaldas", Cantidad: 3, Observaciones: "Continuación", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+
+            { ID: "S21", Sector: "Sector 3", Ubicación: "Markonzaga", Tipo_Adorno: "Guirnaldas", Cantidad: 5, Observaciones: "Zona comercial", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S22", Sector: "Sector 3", Ubicación: "Grupo La Balastera", Tipo_Adorno: "Motivo fachada", Cantidad: 2, Observaciones: "Revisar toma de luz", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S23", Sector: "Sector 3", Ubicación: "Plaza San Pedro", Tipo_Adorno: "Cartel Navidad", Cantidad: 1, Observaciones: "Entrada iglesia", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S24", Sector: "Sector 3", Ubicación: "Calle Rivas", Tipo_Adorno: "Arcos luminosos", Cantidad: 3, Observaciones: "Cruce principal", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S25", Sector: "Sector 3", Ubicación: "Kueto Avenida", Tipo_Adorno: "Arcos luminosos", Cantidad: 4, Observaciones: "Acceso alto", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S26", Sector: "Sector 3", Ubicación: "Kueto Barrio", Tipo_Adorno: "Farolas", Cantidad: 6, Observaciones: "Calles interiores", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S27", Sector: "Sector 3", Ubicación: "Vía Galindo", Tipo_Adorno: "Guirnaldas", Cantidad: 3, Observaciones: "Polígono comercial", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S28", Sector: "Sector 3", Ubicación: "Immaculada", Tipo_Adorno: "Motivo cruzado", Cantidad: 2, Observaciones: "Plaza barrio", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S29", Sector: "Sector 3", Ubicación: "Abaro Avenida", Tipo_Adorno: "Arcos", Cantidad: 5, Observaciones: "Eje principal", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S30", Sector: "Sector 3", Ubicación: "Abaro Parque", Tipo_Adorno: "Guirnalda arbolado", Cantidad: 4, Observaciones: "Zona infantil", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S31", Sector: "Sector 3", Ubicación: "Aspaldiko", Tipo_Adorno: "Farolas", Cantidad: 3, Observaciones: "Casco histórico", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S32", Sector: "Sector 3", Ubicación: "San Pedro Iglesia", Tipo_Adorno: "Iluminación ornamental", Cantidad: 2, Observaciones: "Fachada histórica", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S33", Sector: "Sector 3", Ubicación: "Nafarroa", Tipo_Adorno: "Arcos", Cantidad: 3, Observaciones: "Conexión sector", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" },
+            { ID: "S34", Sector: "Sector 3", Ubicación: "Venancio", Tipo_Adorno: "Guirnaldas", Cantidad: 3, Observaciones: "Calle peatonal", Coordenada_GPS_InSitu: "", Estado: "Pendiente", FotoRef: "", LocalImg: "" }
         ];
 
-        // Intentamos cargar por si acaso hay cambios previos guardados localmente
-        if(localStorage.getItem('sestao_items')) {
-            try { items = JSON.parse(localStorage.getItem('sestao_items')); } catch(e){}
+        let items = itemsDefault;
+        if(localStorage.getItem('sestao_items_v3')) {
+            try { items = JSON.parse(localStorage.getItem('sestao_items_v3')); } catch(e){}
         }
 
         async function updateServer(payload) {
@@ -123,8 +164,12 @@
                     body: JSON.stringify(payload)
                 });
             } catch (err) {
-                console.log("Sincronización en segundo plano");
+                console.log("Sincronizando...");
             }
+        }
+
+        function saveData() {
+            localStorage.setItem('sestao_items_v3', JSON.stringify(items));
         }
 
         function render(data) {
@@ -140,7 +185,13 @@
                     ? `https://www.google.com/maps/search/?api=1&query=${item.Coordenada_GPS_InSitu}`
                     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.Ubicación + ' Sestao')}`;
 
-                let fotoLink = item.FotoRef ? `<div style="margin-top:6px;"><a href="${item.FotoRef}" target="_blank" style="color:#60a5fa; font-size:0.75rem; font-weight:600;">📎 Ver foto en Drive</a></div>` : '';
+                let fotoSrc = item.LocalImg || item.FotoRef;
+                let previewHtml = fotoSrc 
+                    ? `<div>
+                        <img src="${fotoSrc}" class="thumb-preview" onclick="openModal('${fotoSrc}')" title="Haz clic para agrandar">
+                        ${item.FotoRef ? `<div style="margin-top:4px;"><a href="${item.FotoRef}" target="_blank" style="color:#60a5fa; font-size:0.75rem;">📎 Abrir enlace en Drive</a></div>` : ''}
+                       </div>` 
+                    : '';
 
                 return `
                     <div class="${cardClass}">
@@ -154,16 +205,25 @@
                         <p style="font-size:0.85rem; color:#cbd5e1; margin:6px 0;"><strong>Sector:</strong> ${item.Sector} | <strong>Adorno:</strong> ${item.Tipo_Adorno} (${item.Cantidad} ud)</p>
                         <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom:4px;"><strong>Obs:</strong> ${item.Observaciones || 'Sin observaciones'}</p>
                         <div class="gps-status">📍 GPS: ${item.Coordenada_GPS_InSitu || 'No registrado'}</div>
-                        ${fotoLink}
+                        
+                        ${previewHtml}
                         
                         <div class="actions">
                             <a href="${mapUrl}" target="_blank" class="btn btn-map">🗺️ Ir al sitio</a>
                             <button onclick="toggleComplete('${item.ID}')" class="btn btn-check">${checkLabel}</button>
                             <button onclick="setGPS('${item.ID}')" class="btn btn-gps">📍 Fijar GPS</button>
+                            
                             <label class="btn btn-camera">
-                                📷 Hacer foto y subir a Drive
+                                📷 Cámara
                                 <input type="file" accept="image/*" capture="camera" onchange="uploadPhoto(event, '${item.ID}')">
                             </label>
+                            
+                            <label class="btn btn-file">
+                                📁 Archivos
+                                <input type="file" accept="image/*" onchange="uploadPhoto(event, '${item.ID}')">
+                            </label>
+
+                            ${isDone || fotoSrc ? `<button onclick="undoItem('${item.ID}')" class="btn btn-undo">🗑️ Deshacer foto / estado</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -174,26 +234,26 @@
             let item = items.find(i => i.ID === id);
             if(item) {
                 item.Estado = (item.Estado === 'Instalado') ? 'Pendiente' : 'Instalado';
-                localStorage.setItem('sestao_items', JSON.stringify(items));
+                saveData();
                 render(items);
                 updateServer({ id: id, estado: item.Estado });
             }
         }
 
         function setGPS(id) {
-            if (!navigator.geolocation) return alert("Sin GPS");
+            if (!navigator.geolocation) return alert("GPS no disponible");
             navigator.geolocation.getCurrentPosition((pos) => {
                 let coords = `${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`;
                 let item = items.find(i => i.ID === id);
                 if(item) {
                     item.Coordenada_GPS_InSitu = coords;
                     item.Estado = 'Mapeado';
-                    localStorage.setItem('sestao_items', JSON.stringify(items));
+                    saveData();
                     render(items);
                     updateServer({ id: id, gps: coords, estado: 'Mapeado' });
-                    alert("GPS fijado y sincronizado.");
+                    alert("GPS fijado correctamente.");
                 }
-            }, () => alert("GPS denegado"));
+            }, () => alert("Permiso GPS denegado"));
         }
 
         function uploadPhoto(event, id) {
@@ -204,15 +264,33 @@
                 let base64Code = e.target.result.split(',')[1];
                 let item = items.find(i => i.ID === id);
                 if(item) {
+                    item.LocalImg = e.target.result;
                     item.Estado = 'Instalado';
-                    localStorage.setItem('sestao_items', JSON.stringify(items));
+                    saveData();
                     render(items);
                 }
-                alert("Subiendo foto a Google Drive...");
+                alert("Subiendo archivo a Google Drive...");
                 updateServer({ id: id, estado: 'Instalado', fotoBase64: base64Code });
-                alert("¡Foto enviada a la nube correctamente!");
+                alert("¡Foto guardada en la app y subida a Drive!");
             };
             reader.readAsDataURL(file);
+        }
+
+        function undoItem(id) {
+            let item = items.find(i => i.ID === id);
+            if(item && confirm("¿Quieres borrar la foto y volver a marcar este punto como pendiente?")) {
+                item.Estado = 'Pendiente';
+                item.LocalImg = '';
+                item.FotoRef = '';
+                saveData();
+                render(items);
+                updateServer({ id: id, estado: 'Pendiente', gps: '' });
+            }
+        }
+
+        function openModal(src) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('imgModal').style.display = 'flex';
         }
 
         function filterData() {

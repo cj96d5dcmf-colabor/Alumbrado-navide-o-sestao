@@ -3,25 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alumbrado Sestao 2025-2026 - Mapeo y Fotos</title>
+    <title>Alumbrado Sestao 2025-2026 - Control Total</title>
     <style>
         :root { --primary: #0f172a; --accent: #2563eb; --success: #16a34a; --warning: #ca8a04; --bg: #f8fafc; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-        body { background-color: var(--bg); color: #334155; padding-bottom: 40px; }
-        header { background-color: var(--primary); color: white; padding: 16px; text-align: center; }
+        body { background-color: var(--bg); color: #334155; padding-bottom: 50px; }
+        header { background-color: var(--primary); color: white; padding: 14px 16px; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
         .container { padding: 12px; max-width: 600px; margin: 0 auto; }
+        .btn-add { background: var(--success); color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
         .filters { display: flex; gap: 8px; margin-bottom: 12px; }
         .filters input, .filters select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; background: white; }
         .filters input { flex: 1; }
         .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .card.completado { border-color: var(--success); background: #f0fdf4; }
         .card-title { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
         .badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; font-weight: 600; text-transform: uppercase; }
         .badge.pendiente { background: #fef9c3; color: var(--warning); }
-        .badge.mapeado { background: #dcfce7; color: var(--success); }
+        .badge.hecho { background: #dcfce7; color: var(--success); }
+        .ref-img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid #cbd5e1; background: #e2e8f0; }
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
         .btn { padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .btn-map { background: #eff6ff; color: var(--accent); }
         .btn-gps { background: #f0fdf4; color: var(--success); }
+        .btn-check { background: #e2e8f0; color: #334155; }
+        .card.completado .btn-check { background: #dcfce7; color: var(--success); font-weight: 700; }
         .btn-camera { background: #faf5ff; color: #9333ea; grid-column: span 2; }
         .gps-status { font-size: 0.75rem; color: #64748b; margin-top: 6px; font-weight: 500; }
         input[type="file"] { display: none; }
@@ -29,13 +34,16 @@
 </head>
 <body>
     <header>
-        <h1>Alumbrado Sestao 2025-2026</h1>
-        <p style="font-size:0.8rem; opacity:0.8; margin-top:4px;">Control de Campo, Fotos y GPS</p>
+        <div>
+            <h1 style="font-size: 1.1rem;">Alumbrado Sestao</h1>
+            <p style="font-size:0.75rem; opacity:0.8;">Gestión de Campo, GPS y Fotos</p>
+        </div>
+        <button onclick="addNewPoint()" class="btn-add">➕ Añadir Punto</button>
     </header>
 
     <div class="container">
         <div class="filters">
-            <input type="text" id="searchInput" placeholder="Buscar punto o calle..." onkeyup="filterData()">
+            <input type="text" id="searchInput" placeholder="Buscar calle, ID o adorno..." onkeyup="filterData()">
             <select id="sectorFilter" onchange="filterData()">
                 <option value="">Todos los sectores</option>
                 <option value="Sector 1">Sector 1: Kasko</option>
@@ -44,47 +52,71 @@
             </select>
         </div>
 
-        <div id="app">Cargando inventario...</div>
+        <div id="app">Cargando puntos e imágenes...</div>
     </div>
 
     <script>
-        // URL de tu Web App de Google Apps Script ya integrada
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzxWbC04auRkHoufvK64_pIx5WLlTF_y40gRZD.icvcLsbbgGm007klp8_C9WomklFDI9w";
 
+        // Inventario oficial completo con las referencias visuales asociadas
         let items = [
-            { ID: "SES-01", Sector: "Sector 1: Kasko/Centro", Ubicación: "Ayuntamiento de Sestao", Tipo_Adorno: "TIPO E", Cantidad: 1, Observaciones: "Balconada", Coordenada_GPS_InSitu: "43.294276,-3.018454", Estado: "Pendiente" },
-            { ID: "SES-02", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza del Kasko", Tipo_Adorno: "TIPO F", Cantidad: 1, Observaciones: "Jardín lateral Ayuntamiento", Coordenada_GPS_InSitu: "43.294270,-3.018408", Estado: "Pendiente" },
-            { ID: "SES-03", Sector: "Sector 1: Kasko/Centro", Ubicación: "Kiosko Pza Kasko", Tipo_Adorno: "TIPO J", Cantidad: 1, Observaciones: "8 bolas mimbre + Icicle", Coordenada_GPS_InSitu: "43.294200,-3.018300", Estado: "Pendiente" },
-            { ID: "SES-04", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO A", Cantidad: 5, Observaciones: "Tramo plaza Kasko y Azkue", Coordenada_GPS_InSitu: "43.294100,-3.018200", Estado: "Pendiente" },
-            { ID: "SES-05", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO B", Cantidad: 8, Observaciones: "Frente al Ayuntamiento", Coordenada_GPS_InSitu: "43.294000,-3.018100", Estado: "Pendiente" },
-            { ID: "SES-15", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO A", Cantidad: 4, Observaciones: "Tramo Zumalakarregi y La Galana", Coordenada_GPS_InSitu: "43.295000,-3.019000", Estado: "Pendiente" }
+            { ID: "SES-01", Sector: "Sector 1: Kasko/Centro", Ubicación: "Ayuntamiento", Tipo_Adorno: "TIPO E", Cantidad: 1, Observaciones: "Balconada Ayuntamiento", Coordenada_GPS_InSitu: "43.294276,-3.018454", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-02", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza del Kasko", Tipo_Adorno: "TIPO F", Cantidad: 1, Observaciones: "Jardín lateral Ayuntamiento", Coordenada_GPS_InSitu: "43.294270,-3.018408", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1512389142bc6-5f750b3294c2?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-03", Sector: "Sector 1: Kasko/Centro", Ubicación: "Kiosko Pza Kasko", Tipo_Adorno: "TIPO J", Cantidad: 1, Observaciones: "8 bolas mimbre + Icicle", Coordenada_GPS_InSitu: "43.294200,-3.018300", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-04", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO A", Cantidad: 5, Observaciones: "Tramo plaza del Kasko y R. M. Azkue", Coordenada_GPS_InSitu: "43.294100,-3.018200", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-05", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO B", Cantidad: 8, Observaciones: "Frente al Ayuntamiento", Coordenada_GPS_InSitu: "43.294000,-3.018100", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-06", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO C", Cantidad: 10, Observaciones: "Tramo del 39 al 49 ALTERNOS", Coordenada_GPS_InSitu: "43.293900,-3.018000", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1512389142bc6-5f750b3294c2?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-07", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO C", Cantidad: 26, Observaciones: "Tramo del 68 al 90 ALTERNOS", Coordenada_GPS_InSitu: "43.293800,-3.017900", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1512389142bc6-5f750b3294c2?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-08", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO D", Cantidad: 3, Observaciones: "Frente colegio Kueto", Coordenada_GPS_InSitu: "43.293700,-3.017800", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-09", Sector: "Sector 1: Kasko/Centro", Ubicación: "Gran Vía", Tipo_Adorno: "TIPO C", Cantidad: 4, Observaciones: "Carrefour", Coordenada_GPS_InSitu: "43.293600,-3.017700", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1512389142bc6-5f750b3294c2?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-10", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza de los tres Concejos", Tipo_Adorno: "TIPO G (Cono 3D)", Cantidad: 1, Observaciones: "Cono Navideño 3D en plaza", Coordenada_GPS_InSitu: "43.293500,-3.017600", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-11", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza Tres Concejos", Tipo_Adorno: "TIPO I", Cantidad: 3, Observaciones: "Adorno Especial Plaza", Coordenada_GPS_InSitu: "43.293400,-3.017500", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-12", Sector: "Sector 1: Kasko/Centro", Ubicación: "Plaza Conde Balmaseda", Tipo_Adorno: "TIPO G (Cono 3D)", Cantidad: 1, Observaciones: "Cono Navideño 3D en plaza", Coordenada_GPS_InSitu: "43.293300,-3.017400", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-13", Sector: "Sector 1: Kasko/Centro", Ubicación: "Conde Balmaseda", Tipo_Adorno: "TIPO D", Cantidad: 5, Observaciones: "Tramo Conde Balmaseda", Coordenada_GPS_InSitu: "43.293200,-3.017300", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-14", Sector: "Sector 1: Kasko/Centro", Ubicación: "Manuel Andrés", Tipo_Adorno: "TIPO A", Cantidad: 5, Observaciones: "Tramo Gran Vía y Txabarri", Coordenada_GPS_InSitu: "43.293100,-3.017200", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-15", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO A", Cantidad: 4, Observaciones: "Tramo Zumalakarregi y La Galana", Coordenada_GPS_InSitu: "43.295000,-3.019000", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-16", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO B", Cantidad: 7, Observaciones: "Arco Transversal Txabarri", Coordenada_GPS_InSitu: "43.295100,-3.019100", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-17", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO D", Cantidad: 1, Observaciones: "Cruce con Aizpuru", Coordenada_GPS_InSitu: "43.295200,-3.019200", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-18", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Txabarri", Tipo_Adorno: "TIPO D", Cantidad: 2, Observaciones: "Rotonda frente al nº 51", Coordenada_GPS_InSitu: "43.295300,-3.019300", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-19", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Vía Galindo", Tipo_Adorno: "TIPO B", Cantidad: 10, Observaciones: "Arco Transversal Galindo", Coordenada_GPS_InSitu: "43.295400,-3.019400", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-20", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Vía Galindo", Tipo_Adorno: "TIPO C", Cantidad: 4, Observaciones: "Banderola / Báculo, cruce Samaniego", Coordenada_GPS_InSitu: "43.295500,-3.019500", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1512389142bc6-5f750b3294c2?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-21", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Vía Galindo", Tipo_Adorno: "TIPO D", Cantidad: 3, Observaciones: "Tramo Galindo", Coordenada_GPS_InSitu: "43.295600,-3.019600", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-22", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Avenida del Kaiku", Tipo_Adorno: "TIPO D", Cantidad: 4, Observaciones: "Av. Kaiku general", Coordenada_GPS_InSitu: "43.295700,-3.019700", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-23", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Avenida del Kaiku", Tipo_Adorno: "TIPO E", Cantidad: 1, Observaciones: "Fachada Especial, viviendas punta", Coordenada_GPS_InSitu: "43.295800,-3.019800", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-24", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Sotera de la Mier", Tipo_Adorno: "TIPO C", Cantidad: 9, Observaciones: "Banderola Parque Sotera", Coordenada_GPS_InSitu: "43.295900,-3.019900", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1512389142bc6-5f750b3294c2?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-25", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Sotera de la Mier", Tipo_Adorno: "TIPO D", Cantidad: 3, Observaciones: "Adorno Farola (Bulán Rojo)", Coordenada_GPS_InSitu: "43.296000,-3.020000", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-26", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Nicolás Ormaetxea", Tipo_Adorno: "TIPO D", Cantidad: 3, Observaciones: "Rotonda", Coordenada_GPS_InSitu: "43.296100,-3.020100", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-27", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Autonomía", Tipo_Adorno: "TIPO D", Cantidad: 2, Observaciones: "Cruce con Concepción Arenal", Coordenada_GPS_InSitu: "43.296200,-3.020200", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-28", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Los Baños", Tipo_Adorno: "TIPO A", Cantidad: 5, Observaciones: "Tramo Gran Vía y J.C. Arriaga", Coordenada_GPS_InSitu: "43.296300,-3.020300", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-29", Sector: "Sector 2: Eje Txabarri/Galindo", Ubicación: "Rivas", Tipo_Adorno: "TIPO E", Cantidad: 1, Observaciones: "Fachada Especial frente al 6/8", Coordenada_GPS_InSitu: "43.296400,-3.020400", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-30", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Plaza San Pedro", Tipo_Adorno: "TIPO H", Cantidad: 4, Observaciones: "Motivo Plaza San Pedro", Coordenada_GPS_InSitu: "43.297000,-3.021000", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1512389142bc6-5f750b3294c2?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-31", Sector: "Sector 3: Barrios/Plazas", Ubicación: "J.A. Gandarias", Tipo_Adorno: "TIPO A", Cantidad: 3, Observaciones: "Tramo Plaza San Pedro y Buenavista", Coordenada_GPS_InSitu: "43.297100,-3.021100", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-32", Sector: "Sector 3: Barrios/Plazas", Ubicación: "J.A. Gandarias", Tipo_Adorno: "TIPO D", Cantidad: 2, Observaciones: "Tramo Gandarias", Coordenada_GPS_InSitu: "43.297200,-3.021200", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-33", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Vía Amézaga", Tipo_Adorno: "TIPO A", Cantidad: 3, Observaciones: "Tramo Vía Galindo y Plaza San Pedro", Coordenada_GPS_InSitu: "43.297300,-3.021300", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-34", Sector: "Sector 3: Barrios/Plazas", Ubicación: "San Diego", Tipo_Adorno: "TIPO A", Cantidad: 2, Observaciones: "Tramo Iberia y Aizpuru", Coordenada_GPS_InSitu: "43.297400,-3.021400", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-35", Sector: "Sector 3: Barrios/Plazas", Ubicación: "San Diego", Tipo_Adorno: "TIPO C", Cantidad: 4, Observaciones: "Grupo La Paz", Coordenada_GPS_InSitu: "43.297500,-3.021500", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1512389142bc6-5f750b3294c2?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-36", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Villar y Villate", Tipo_Adorno: "TIPO A", Cantidad: 2, Observaciones: "Villar y Villate", Coordenada_GPS_InSitu: "43.297600,-3.021600", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-37", Sector: "Sector 3: Barrios/Plazas", Ubicación: "Iparraguirre", Tipo_Adorno: "TIPO A", Cantidad: 2, Observaciones: "Iparraguirre", Coordenada_GPS_InSitu: "43.297700,-3.021700", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" },
+            { ID: "SES-38", Sector: "Sector 3: Barrios/Plazas", Ubicación: "La Iberia", Tipo_Adorno: "TIPO A", Cantidad: 4, Observaciones: "Tramo Gran Vía y Txabarri", Coordenada_GPS_InSitu: "43.297800,-3.021800", Estado: "Pendiente", FotoRef: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500&auto=format&fit=crop&q=60" }
         ];
-
-        async function loadData() {
-            try {
-                let response = await fetch(WEB_APP_URL);
-                let serverData = await response.json();
-                if(serverData && serverData.length > 0) items = serverData;
-                render(items);
-            } catch (error) {
-                render(items);
-            }
-        }
 
         function render(data) {
             const container = document.getElementById('app');
             container.innerHTML = data.map(item => {
-                let hasGPS = item.Coordenada_GPS_InSitu && item.Coordenada_GPS_InSitu.includes(',');
-                let gpsText = hasGPS ? `📍 GPS Registrado: ${item.Coordenada_GPS_InSitu}` : `📍 GPS In Situ: No mapeado aún`;
-                let badgeClass = hasGPS ? 'mapeado' : 'pendiente';
-                let badgeText = hasGPS ? 'Mapeado' : 'Pendiente GPS';
+                let isDone = item.Estado === 'Instalado' || item.Estado === 'Mapeado' || item.Completado === true;
+                let cardClass = isDone ? 'card completado' : 'card';
+                let badgeClass = isDone ? 'hecho' : 'pendiente';
+                let badgeText = isDone ? '✓ Hecho / Mapeado' : 'Pendiente';
+                let checkLabel = isDone ? '↩ Desmarcar' : '✓ Marcar Hecho';
 
-                let mapUrl = hasGPS 
+                let mapUrl = item.Coordenada_GPS_InSitu 
                     ? `https://www.google.com/maps/search/?api=1&query=${item.Coordenada_GPS_InSitu}`
                     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.Ubicación + ' Sestao')}`;
 
+                let imgHtml = item.FotoRef ? `<img src="${item.FotoRef}" class="ref-img" alt="Foto adorno">` : '';
+
                 return `
-                    <div class="card">
+                    <div class="${cardClass}">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <div>
                                 <span style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">${item.ID}</span>
@@ -93,10 +125,12 @@
                             <span class="badge ${badgeClass}">${badgeText}</span>
                         </div>
                         <p style="font-size:0.85rem; color:#64748b; margin:6px 0;"><strong>Sector:</strong> ${item.Sector} | <strong>Adorno:</strong> ${item.Tipo_Adorno} (${item.Cantidad} ud)</p>
-                        <p style="font-size:0.85rem; color:#64748b; margin-bottom:8px;"><strong>Obs:</strong> ${item.Observaciones || 'Sin observaciones'}</p>
-                        <div id="gps-info-${item.ID}" class="gps-status">${gpsText}</div>
+                        <p style="font-size:0.85rem; color:#64748b; margin-bottom:6px;"><strong>Obs:</strong> ${item.Observaciones || 'Sin observaciones'}</p>
+                        ${imgHtml}
+                        <div id="gps-info-${item.ID}" class="gps-status" style="margin-top:8px;">📍 GPS: ${item.Coordenada_GPS_InSitu || 'No registrado'}</div>
                         <div class="actions">
                             <a href="${mapUrl}" target="_blank" class="btn btn-map">🗺️ Ir al sitio</a>
+                            <button onclick="toggleComplete('${item.ID}')" class="btn btn-check">${checkLabel}</button>
                             <button onclick="setTerrainsGPS('${item.ID}')" class="btn btn-gps">📍 Fijar GPS aquí</button>
                             <label class="btn btn-camera">
                                 📷 Hacer foto de montaje
@@ -106,6 +140,46 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        function toggleComplete(id) {
+            let item = items.find(i => i.ID === id);
+            if(item) {
+                if(item.Estado === 'Instalado' || item.Estado === 'Mapeado') {
+                    item.Estado = 'Pendiente';
+                    item.Completado = false;
+                } else {
+                    item.Estado = 'Instalado';
+                    item.Completado = true;
+                }
+                render(items);
+            }
+        }
+
+        function addNewPoint() {
+            let ubicacionNombre = prompt("Introduce el nombre de la calle o ubicación del nuevo punto:");
+            if(!ubicacionNombre) return;
+
+            if (!navigator.geolocation) return alert("Dispositivo sin soporte GPS.");
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                let coords = `${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`;
+                let newId = "SES-" + (items.length + 1);
+                let nuevoPunto = {
+                    ID: newId,
+                    Sector: "Sector Nuevo / Extra",
+                    Ubicación: ubicacionNombre,
+                    Tipo_Adorno: "Adorno Extra",
+                    Cantidad: 1,
+                    Observaciones: "Punto añadido in situ desde la calle",
+                    Coordenada_GPS_InSitu: coords,
+                    Estado: "Mapeado",
+                    Completado: true,
+                    FotoRef: ""
+                };
+                items.unshift(nuevoPunto);
+                render(items);
+                alert(`¡Punto ${newId} (${ubicacionNombre}) añadido con éxito con GPS ${coords}!`);
+            }, () => alert("Permiso de GPS denegado."), { enableHighAccuracy: true });
         }
 
         function filterData() {
@@ -123,19 +197,15 @@
             if (!navigator.geolocation) return alert("Dispositivo sin soporte GPS.");
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 let coords = `${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`;
-                if(confirm(`¿Guardar posición actual (${coords}) para el elemento ${id}?`)) {
-                    document.getElementById(`gps-info-${id}`).innerText = `📍 GPS Registrado: ${coords}`;
-                    try {
-                        await fetch(WEB_APP_URL, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id: id, gpsInSitu: coords, estado: 'Mapeado' })
-                        });
-                        alert("Coordenada guardada en Google Drive.");
-                    } catch (e) { alert("Guardado localmente."); }
+                let item = items.find(i => i.ID === id);
+                if(item) {
+                    item.Coordenada_GPS_InSitu = coords;
+                    item.Estado = 'Mapeado';
+                    document.getElementById(`gps-info-${id}`).innerText = `📍 GPS: ${coords}`;
+                    render(items);
+                    alert(`Coordenada ${coords} fijada para ${id}.`);
                 }
-            }, () => alert("Permiso de GPS denegado en Safari."), { enableHighAccuracy: true });
+            }, () => alert("Permiso de GPS denegado."), { enableHighAccuracy: true });
         }
 
         function uploadPhoto(event, id) {
@@ -144,7 +214,7 @@
             let reader = new FileReader();
             reader.onload = async function(e) {
                 let base64 = e.target.result.split(',')[1];
-                alert(`Subiendo foto para ${id}...`);
+                alert(`Subiendo foto de montaje para ${id}...`);
                 try {
                     await fetch(WEB_APP_URL, {
                         method: 'POST',
@@ -152,13 +222,16 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id: id, fotoBase64: base64, estado: 'Instalado' })
                     });
+                    let item = items.find(i => i.ID === id);
+                    if(item) { item.Estado = 'Instalado'; item.Completado = true; }
+                    render(items);
                     alert("¡Foto subida con éxito a tu Google Drive!");
                 } catch (err) { alert("Error al subir la imagen."); }
             };
             reader.readAsDataURL(file);
         }
 
-        loadData();
+        render(items);
     </script>
 </body>
 </html>
